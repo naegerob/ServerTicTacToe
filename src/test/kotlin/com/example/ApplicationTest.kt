@@ -9,6 +9,7 @@ import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
 import io.ktor.websocket.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -42,8 +43,9 @@ class ApplicationTest {
             send(Frame.Text(message))
             println("Sent: $message")
             val gameField = listOf("", "", "", "", "", "", "", "", "")
-
-           // sendSerialized(gameFieldSer)
+            val gameFieldSer = GameField(gameField)
+            val jsonString = Json.encodeToString(gameFieldSer)
+            sendSerialized(jsonString)
 
             for (frame in incoming) {
                 frame as? Frame.Text ?: continue

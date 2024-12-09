@@ -33,5 +33,3 @@ fun Application.configureSockets() {
     }
 }
 
-@Serializable
-data class GameField(val gameField: List<String>)
