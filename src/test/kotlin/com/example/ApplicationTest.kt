@@ -5,6 +5,7 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
 import io.ktor.websocket.*
@@ -32,7 +33,9 @@ class ApplicationTest {
             module()
         }
         val client = HttpClient(CIO) {
-            install(WebSockets)
+            install(WebSockets) {
+                contentConverter = KotlinxWebsocketSerializationConverter(Json)
+            }
         }
         client.webSocket(
             host = "localhost",
@@ -42,7 +45,7 @@ class ApplicationTest {
             val message = "Hello, WebSocket!"
             send(Frame.Text(message))
             println("Sent: $message")
-            val gameField = listOf("", "", "", "", "", "", "", "", "")
+            val gameField = listOf("A", "B", "C", "", "", "", "", "", "")
             val gameFieldSer = GameField(gameField)
             val jsonString = Json.encodeToString(gameFieldSer)
             sendSerialized(jsonString)
