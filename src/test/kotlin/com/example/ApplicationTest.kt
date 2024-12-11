@@ -9,6 +9,7 @@ import io.ktor.serialization.kotlinx.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.delay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -44,25 +45,30 @@ class ApplicationTest {
         ) {
             val message = "Hello, WebSocket!"
             send(Frame.Text(message))
-            println("Sent: $message")
+            println("Client: $message")
+
+            delay(2000L)
             val gameField = listOf("A", "B", "C", "", "", "", "", "", "")
+            for (field in gameField) {
+                send(Frame.Text(field))
+            }
+            delay(2000L)
             val gameFieldSer = GameField(gameField)
             val jsonString = Json.encodeToString(gameFieldSer)
-            sendSerialized(jsonString)
+            send(Frame.Text(jsonString))
+            println("Length: ${jsonString.length}")
 
             for (frame in incoming) {
                 frame as? Frame.Text ?: continue
                 val frameText = frame.readText()
                 if(frameText.contains("YOU SAID")) {
-                    println("Received: ${frame.readText()}")
+                    println("Client: ${frame.readText()}")
                     break
                 }
             }
-
             val byeMessage = "bye"
             send(Frame.Text(byeMessage))
-            println("Sent: $byeMessage")
-
+            println("Client: $byeMessage")
         }
         client.close()
     }

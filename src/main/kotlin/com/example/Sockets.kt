@@ -5,6 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.channels.consumeEach
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.time.Duration
@@ -21,16 +22,25 @@ fun Application.configureSockets() {
         masking = false
     }
     routing {
-        webSocket("/tictactoe") { // websocketSession
-            for (frame in incoming) {
-                if (frame is Frame.Text) {
-                    val text = frame.readText()
-                    println("Server: $text")
-                    outgoing.send(Frame.Text("YOU SAID: $text"))
-                    if (text.equals("bye", ignoreCase = true)) {
-                        close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
+        webSocket("/tictactoe") {
+            try {
+                incoming.consumeEach { frame ->
+                    if (frame is Frame.Text) {
+                        val text = frame.readText()
+                        println("Server: $text")
+                        outgoing.send(Frame.Text("YOU SAID: $text"))
+                        if (text.equals("bye", ignoreCase = true)) {
+                            close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
+                        }
+                    }
+                    if(frame is Frame.Binary) {
+                        val content = frame.readBytes()
+                        println("Server: $content")
+                        outgoing.send(Frame.Text("YOU SAID: $content"))
                     }
                 }
+            } catch (e: Exception) {
+                //
             }
         }
     }
