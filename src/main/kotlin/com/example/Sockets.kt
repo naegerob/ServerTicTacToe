@@ -29,12 +29,11 @@ fun Application.configureSockets() {
             println("onConnect")
             try {
                 for (frame in incoming) {
-                    val gameFieldSer = receiveDeserialized<GameField>()
-                    sendSerialized(gameFieldSer)
                     val text = (frame as Frame.Text).readText()
-                    println("onMessage")
+                    val gameField = 
+                    println("abcMessage")
                     received += text
-                    outgoing.send(Frame.Text(text))
+                    outgoing.send(Frame.Text(text + "S"))
                 }
             } catch (e: ClosedReceiveChannelException) {
                 println("onClose ${closeReason.await()}")
