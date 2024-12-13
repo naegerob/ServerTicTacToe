@@ -5,9 +5,11 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.websocket.*
+import kotlinx.coroutines.channels.ClosedReceiveChannelException
 import kotlinx.coroutines.channels.consumeEach
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import model.GameField
 import java.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.DurationUnit
@@ -23,25 +25,24 @@ fun Application.configureSockets() {
     }
     routing {
         webSocket("/tictactoe") {
+            var received = "Start: "
+            println("onConnect")
             try {
-                incoming.consumeEach { frame ->
-                    if (frame is Frame.Text) {
-                        val text = frame.readText()
-                        println("Server: $text")
-                        outgoing.send(Frame.Text("YOU SAID: $text"))
-                        if (text.equals("bye", ignoreCase = true)) {
-                            close(CloseReason(CloseReason.Codes.NORMAL, "Client said BYE"))
-                        }
-                    }
-                    if(frame is Frame.Binary) {
-                        val content = frame.readBytes()
-                        println("Server: $content")
-                        outgoing.send(Frame.Text("YOU SAID: $content"))
-                    }
+                for (frame in incoming) {
+                    val gameFieldSer = receiveDeserialized<GameField>()
+                    sendSerialized(gameFieldSer)
+                    val text = (frame as Frame.Text).readText()
+                    println("onMessage")
+                    received += text
+                    outgoing.send(Frame.Text(text))
                 }
-            } catch (e: Exception) {
-                //
+            } catch (e: ClosedReceiveChannelException) {
+                println("onClose ${closeReason.await()}")
+            } catch (e: Throwable) {
+                println("onError ${closeReason.await()}")
+                e.printStackTrace()
             }
+
         }
     }
 }
