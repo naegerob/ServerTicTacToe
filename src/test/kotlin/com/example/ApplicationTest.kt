@@ -19,6 +19,7 @@ import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import model.GameField
+import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf
 
 class ApplicationTest {
 
@@ -48,13 +49,13 @@ class ApplicationTest {
             path = "/tictactoe"
         ) {
 
-            val gameField = listOf("A", "B", "C", "", "", "", "", "", "")
+            val gameField = listOf("A", "B", "C", "D", "E", "F", "G", "H", "I")
             val gameFieldSer = GameField(gameField)
 
             sendSerialized(gameFieldSer)
 
-            val gamefield = receiveDeserialized<GameField>()
-            println(gamefield.toString())
+            val gamefieldReturn = receiveDeserialized<GameField>()
+            assertEquals(gameFieldSer.toString(), gamefieldReturn.toString())
         }
         client.close()
     }

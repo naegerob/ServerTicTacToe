@@ -7,7 +7,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 fun Application.configureSerialization() {
     install(ContentNegotiation) {
-        json()
+        json() // websockets has its own serializers which is set at the installation
     }
     routing {
         get("/json/kotlinx-serialization") {

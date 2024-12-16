@@ -25,15 +25,13 @@ fun Application.configureSockets() {
     }
     routing {
         webSocket("/tictactoe") {
-            var received = "Start: "
+
             println("onConnect")
             try {
                 for (frame in incoming) {
                     val text = (frame as Frame.Text).readText()
-                    val gameField = 
-                    println("abcMessage")
-                    received += text
-                    outgoing.send(Frame.Text(text + "S"))
+
+                    outgoing.send(Frame.Text(text))
                 }
             } catch (e: ClosedReceiveChannelException) {
                 println("onClose ${closeReason.await()}")
