@@ -7,19 +7,11 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.*
-import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.testing.*
-import io.ktor.server.websocket.*
-import io.ktor.websocket.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import model.GameField
-import kotlin.reflect.jvm.internal.impl.metadata.ProtoBuf
 
 class ApplicationTest {
 
@@ -49,13 +41,15 @@ class ApplicationTest {
             path = "/tictactoe"
         ) {
 
-            val gameField = listOf("A", "B", "C", "D", "E", "F", "G", "H", "I")
+            val gameField = mutableListOf("X", "O", "O", "", "", "O", "X", "", "")
+            val gameFieldRef = mutableListOf("X", "O", "O", "X", "", "O", "X", "", "")
             val gameFieldSer = GameField(gameField)
 
             sendSerialized(gameFieldSer)
 
-            val gamefieldReturn = receiveDeserialized<GameField>()
-            assertEquals(gameFieldSer.toString(), gamefieldReturn.toString())
+            val gamefieldSerReturn = receiveDeserialized<GameField>()
+            //val randomNumber = receiveDeserialized<Int>()
+            assertEquals(gameFieldRef.toString(), gamefieldSerReturn.gameField.toString())
         }
         client.close()
     }
