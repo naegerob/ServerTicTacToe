@@ -26,7 +26,7 @@ class ApplicationTest {
     }
 
     @Test
-    fun testSocket() = testApplication {
+    fun testSocketV1() = testApplication {
         application {
             module()
         }
@@ -41,14 +41,39 @@ class ApplicationTest {
             path = "/tictactoe"
         ) {
 
-            val gameField = mutableListOf("X", "O", "O", "", "", "O", "X", "", "")
             val gameFieldRef = mutableListOf("X", "O", "O", "X", "", "O", "X", "", "")
+            val gameField = mutableListOf("X", "O", "O", "", "", "O", "X", "", "")
             val gameFieldSer = GameField(gameField)
 
             sendSerialized(gameFieldSer)
-
             val gamefieldSerReturn = receiveDeserialized<GameField>()
-            //val randomNumber = receiveDeserialized<Int>()
+            assertEquals(gameFieldRef.toString(), gamefieldSerReturn.gameField.toString())
+        }
+        client.close()
+    }
+
+    @Test
+    fun testSocketV2() = testApplication {
+        application {
+            module()
+        }
+        val client = HttpClient(CIO) {
+            install(WebSockets) {
+                contentConverter = KotlinxWebsocketSerializationConverter(Json)
+            }
+        }
+        client.webSocket(
+            host = "localhost",
+            port = 8080,
+            path = "/tictactoe"
+        ) {
+
+            val gameFieldRef = mutableListOf("X", "O", "O", "X", "X", "O", "X", "O", "")
+            val gameField = mutableListOf("X", "O", "O", "X", "", "O", "X", "O", "")
+            val gameFieldSer = GameField(gameField)
+
+            sendSerialized(gameFieldSer)
+            val gamefieldSerReturn = receiveDeserialized<GameField>()
             assertEquals(gameFieldRef.toString(), gamefieldSerReturn.gameField.toString())
         }
         client.close()
