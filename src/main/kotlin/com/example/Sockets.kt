@@ -55,7 +55,6 @@ fun Application.configureSockets() {
                     val modifiedGameFieldJson  = Json.encodeToString(gameListReturn)
                     println(modifiedGameFieldJson)
                     outgoing.send(Frame.Text(modifiedGameFieldJson ))
-                    //outgoing.send(Frame.Text(randomNumber.toString()))
                 }
             } catch (e: SerializationException) {
                 println("Failed to deserialize: ${e.message}")
